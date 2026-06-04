@@ -4,11 +4,11 @@ const productReviewSchema = new Schema(
   {
     customerId: {
       type: Schema.Types.ObjectId,
-      ref: "Customer",
+      ref: "customers",
     },
     productId: {
       type: Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "products",
     },
     title: {
       type: String,
@@ -36,4 +36,4 @@ const productReviewSchema = new Schema(
   }
 );
 
-export default model("ProductReview", productReviewSchema);
+export default model("productreviews", productReviewSchema);

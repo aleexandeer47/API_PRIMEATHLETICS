@@ -36,4 +36,4 @@ const customerSchema = new Schema(
   }
 );
 
-export default model("Customer", customerSchema);
+export default model("customers", customerSchema);

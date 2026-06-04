@@ -28,4 +28,4 @@ const supplierSchema = new Schema(
   }
 );
 
-export default model("Supplier", supplierSchema);
+export default model("suppliers", supplierSchema);

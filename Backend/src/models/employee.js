@@ -38,4 +38,4 @@ const employeeSchema = new Schema(
   }
 );
 
-export default model("Employee", employeeSchema);
+export default model("employees", employeeSchema);
