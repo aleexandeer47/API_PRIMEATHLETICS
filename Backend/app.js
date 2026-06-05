@@ -9,6 +9,9 @@ import logoutRoutes from "./src/routes/logout.js"
 import orderRoutes from "./src/routes/order.js"
 import productRoutes from "./src/routes/product.js"
 import productReview from "./src/routes/productReview.js"
+import registerEmployeeRoutes from "./src/routes/registerEmployees.js"
+import registerAdminRoutes from "./src/routes/registerAdmins.js"
+import registerCustomerRoutes from "./src/routes/registerCustomers.js"
 import recoveryPasswordAdminRoutes from "./src/routes/recoveryPasswordAdmin.js"
 import recoveryPasswordCustomerRoutes from "./src/routes/recoveryPasswordCustomer.js"
 import recoveryPasswordEmployeeRoutes from "./src/routes/recoveryPasswordEmployee.js"
@@ -48,5 +51,8 @@ app.use(
   app.use("/api/recoveryPasswordEmployee" , recoveryPasswordEmployeeRoutes)
   app.use("/api/suppliers" , suppliersRoutes)
   app.use("/api/wompi" , wompiRoutes)
+  app.use("/api/registerEmployees", registerEmployeeRoutes)
+  app.use("/api/registerAdmin", registerAdminRoutes)
+  app.use("/api/registerCustomer", registerCustomerRoutes)
 
   export default app

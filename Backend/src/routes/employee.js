@@ -5,7 +5,6 @@ const router = express.Router();
 
 router.route("/")
 .get(employeController.getEmployees)
-.post(employeController.insertEmployee)
 
 router.route("/:id")
 .put(employeController.updateEmployee)

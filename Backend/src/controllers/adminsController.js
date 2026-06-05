@@ -27,41 +27,6 @@ adminsController.getAdminById = async (req, res) => {
   }
 };
 
-// Insertar admin
-adminsController.insertAdmin = async (req, res) => {
-  try {
-    let { name, email, password, status, isVerified } = req.body;
-    name = name?.trim();
-    email = email?.trim();
-    password = password?.trim();
-
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-    if (name.length < 3) {
-      return res.status(400).json({ message: "Name too short" });
-    }
-    if (email.length > 100) {
-      return res.status(400).json({ message: "Email too long" });
-    }
-    if (password.length < 8) {
-      return res.status(400).json({ message: "Password too short" });
-    }
-
-    const existAdmin = await adminModel.findOne({ email });
-    if (existAdmin) {
-      return res.status(400).json({ message: "Email already in use" });
-    }
-
-    const admin = new adminModel({ name, email, password, status, isVerified });
-    await admin.save();
-    return res.status(201).json({ message: "Admin saved" });
-  } catch (error) {
-    console.log("Error" + error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 // Eliminar admin
 adminsController.deleteAdmin = async (req, res) => {
   try {

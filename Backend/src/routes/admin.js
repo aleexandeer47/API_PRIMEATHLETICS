@@ -5,7 +5,6 @@ const router = express.Router();
 
 router.route("/")
 .get(adminController.getAdmins)
-.post(adminController.insertAdmin)
 
 router.route("/:id")
 .get(adminController.getAdminById)

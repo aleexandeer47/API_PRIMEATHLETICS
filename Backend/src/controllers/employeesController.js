@@ -27,64 +27,6 @@ employeesController.getEmployeeById = async (req, res) => {
   }
 };
 
-// Insertar employee
-employeesController.insertEmployee = async (req, res) => {
-  try {
-    let {
-      name,
-      email,
-      password,
-      phoneNumber,
-      address,
-      position,
-      hireDate,
-      status,
-      isVerified,
-    } = req.body;
-    name = name?.trim();
-    email = email?.trim();
-    password = password?.trim();
-    phoneNumber = phoneNumber?.trim();
-    address = address?.trim();
-    position = position?.trim();
-
-    if (!name || !email || !password || !position) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-    if (name.length < 3) {
-      return res.status(400).json({ message: "Name too short" });
-    }
-    if (email.length > 100) {
-      return res.status(400).json({ message: "Email too long" });
-    }
-    if (password.length < 8) {
-      return res.status(400).json({ message: "Password too short" });
-    }
-
-    const existEmployee = await employeeModel.findOne({ email });
-    if (existEmployee) {
-      return res.status(400).json({ message: "Email already in use" });
-    }
-
-    const employee = new employeeModel({
-      name,
-      email,
-      password,
-      phoneNumber,
-      address,
-      position,
-      hireDate,
-      status,
-      isVerified,
-    });
-    await employee.save();
-    return res.status(201).json({ message: "Employee saved" });
-  } catch (error) {
-    console.log("Error" + error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
-
 // Eliminar employee
 employeesController.deleteEmployee = async (req, res) => {
   try {

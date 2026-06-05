@@ -67,16 +67,9 @@ registerEmployeeController.register = async (req, res) => {
         " — expira en 15 minutos.",
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log("error" + error);
-        return res.status(500).json({ message: "Error al enviar el correo" });
-      }
+    await transporter.sendMail(mailOptions);
 
-      res
-        .status(200)
-        .json({ message: "Empleado registrado. Correo enviado." });
-    });
+    return res.status(200).json({ message: "Empleado registrado. Correo enviado." });
   } catch (error) {
     console.log("error" + error);
     return res.status(500).json({ message: "Internal server error" });

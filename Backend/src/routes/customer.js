@@ -5,7 +5,6 @@ const router = express.Router();
 
 router.route("/")
 .get(customerController.getCustomers)
-.post(customerController.insertCustomer)
 
 router.route("/:id")
 .put(customerController.updateCustomer)
