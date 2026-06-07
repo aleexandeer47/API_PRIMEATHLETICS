@@ -2,7 +2,6 @@ import orderModel from "../models/order.js";
 
 const ordersController = {};
 
-// Obtener órdenes
 ordersController.getOrders = async (req, res) => {
   try {
     const orders = await orderModel.find();
@@ -13,7 +12,6 @@ ordersController.getOrders = async (req, res) => {
   }
 };
 
-// Obtener orden por ID
 ordersController.getOrderById = async (req, res) => {
   try {
     const order = await orderModel.findById(req.params.id);
@@ -27,39 +25,38 @@ ordersController.getOrderById = async (req, res) => {
   }
 };
 
-// Insertar orden
 ordersController.insertOrder = async (req, res) => {
   try {
     let {
-      shoppingCartId,
-      paymentMethod,
-      paymentStatus,
-      orderStatus,
-      trackingNumber,
-      deliveryAddress,
-      totalAmount,
+      shopping_cart_id,
+      payment_method,
+      payment_status,
+      order_status,
+      tracking_number,
+      delivery_address,
+      total_amount,
       shipment,
-      deliveryDate,
+      delivery_date,
     } = req.body;
 
-    paymentMethod = paymentMethod?.trim();
-    trackingNumber = trackingNumber?.trim();
-    deliveryAddress = deliveryAddress?.trim();
+    payment_method = payment_method?.trim();
+    tracking_number = tracking_number?.trim();
+    delivery_address = delivery_address?.trim();
 
-    if (!shoppingCartId || !paymentMethod || totalAmount === undefined) {
+    if (!shopping_cart_id || !payment_method || total_amount === undefined) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     const order = new orderModel({
-      shoppingCartId,
-      paymentMethod,
-      paymentStatus,
-      orderStatus,
-      trackingNumber,
-      deliveryAddress,
-      totalAmount,
+      shopping_cart_id,
+      payment_method,
+      payment_status,
+      order_status,
+      tracking_number,
+      delivery_address,
+      total_amount,
       shipment,
-      deliveryDate,
+      delivery_date,
     });
 
     await order.save();
@@ -70,7 +67,6 @@ ordersController.insertOrder = async (req, res) => {
   }
 };
 
-// Eliminar orden
 ordersController.deleteOrder = async (req, res) => {
   try {
     const deletedOrder = await orderModel.findByIdAndDelete(req.params.id);
@@ -84,48 +80,48 @@ ordersController.deleteOrder = async (req, res) => {
   }
 };
 
-// Actualizar orden
 ordersController.updateOrder = async (req, res) => {
   try {
     let {
-      shoppingCartId,
-      paymentMethod,
-      paymentStatus,
-      orderStatus,
-      trackingNumber,
-      deliveryAddress,
-      totalAmount,
+      shopping_cart_id,
+      payment_method,
+      payment_status,
+      order_status,
+      tracking_number,
+      delivery_address,
+      total_amount,
       shipment,
-      deliveryDate,
+      delivery_date,
     } = req.body;
 
-    paymentMethod = paymentMethod?.trim();
-    trackingNumber = trackingNumber?.trim();
-    deliveryAddress = deliveryAddress?.trim();
+    payment_method = payment_method?.trim();
+    tracking_number = tracking_number?.trim();
+    delivery_address = delivery_address?.trim();
 
-    if (!shoppingCartId || !paymentMethod || totalAmount === undefined) {
+    if (!shopping_cart_id || !payment_method || total_amount === undefined) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     const updatedOrder = await orderModel.findByIdAndUpdate(
       req.params.id,
       {
-        shoppingCartId,
-        paymentMethod,
-        paymentStatus,
-        orderStatus,
-        trackingNumber,
-        deliveryAddress,
-        totalAmount,
+        shopping_cart_id,
+        payment_method,
+        payment_status,
+        order_status,
+        tracking_number,
+        delivery_address,
+        total_amount,
         shipment,
-        deliveryDate,
+        delivery_date,
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedOrder) {
       return res.status(404).json({ message: "Order not found" });
     }
+
     return res.status(200).json({ message: "Order updated" });
   } catch (error) {
     console.log("Error" + error);

@@ -2,11 +2,11 @@ import { Schema, model } from "mongoose";
 
 const productReviewSchema = new Schema(
   {
-    customerId: {
+    customer_id: {
       type: Schema.Types.ObjectId,
       ref: "customers",
     },
-    productId: {
+    product_id: {
       type: Schema.Types.ObjectId,
       ref: "products",
     },
@@ -25,7 +25,7 @@ const productReviewSchema = new Schema(
       type: Boolean,
       default: true,
     },
-    reviewedAt: {
+    reviewed_at: {
       type: Date,
       default: Date.now,
     },
@@ -33,7 +33,8 @@ const productReviewSchema = new Schema(
   {
     timestamps: true,
     strict: false,
-  }
+    collection: "productsReview",
+  },
 );
 
-export default model("productreviews", productReviewSchema);
+export default model("productsReview", productReviewSchema);

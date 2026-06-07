@@ -2,37 +2,37 @@ import { Schema, model } from "mongoose";
 
 const orderSchema = new Schema(
   {
-    shoppingCartId: {
+    shopping_cart_id: {
       type: Schema.Types.ObjectId,
       ref: "ShoppingCart",
     },
-    paymentMethod: {
+    payment_method: {
       type: String,
     },
-    paymentStatus: {
+    payment_status: {
       type: Boolean,
       default: false,
     },
-    orderStatus: {
+    order_status: {
       type: Boolean,
       default: false,
     },
-    trackingNumber: {
+    tracking_number: {
       type: String,
     },
-    deliveryAddress: {
+    delivery_address: {
       type: String,
     },
-    totalAmount: {
+    total_amount: {
       type: Number,
     },
     shipment: {
       type: Number,
     },
-    deliveryDate: {
+    delivery_date: {
       type: Date,
     },
-    orderedAt: {
+    ordered_at: {
       type: Date,
       default: Date.now,
     },
@@ -40,7 +40,7 @@ const orderSchema = new Schema(
   {
     timestamps: true,
     strict: false,
-  }
+  },
 );
 
 export default model("orders", orderSchema);

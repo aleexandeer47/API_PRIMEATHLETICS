@@ -17,9 +17,11 @@ productsReviewController.getReviews = async (req, res) => {
 productsReviewController.getReviewById = async (req, res) => {
   try {
     const review = await productReviewModel.findById(req.params.id);
+
     if (!review) {
       return res.status(404).json({ message: "Review not found" });
     }
+
     return res.status(200).json(review);
   } catch (error) {
     console.log("Error" + error);
@@ -27,47 +29,46 @@ productsReviewController.getReviewById = async (req, res) => {
   }
 };
 
-// Insertar reviews
+// Insertar review
 productsReviewController.insertReviews = async (req, res) => {
   try {
     let {
-      customerId,
-      idEmployee,
-      productId,
-      idProduct,
+      customer_id,
+      product_id,
       title,
       rating,
       description,
-      comment,
       status,
+      reviewed_at,
     } = req.body;
 
-    const finalCustomerId = customerId || idEmployee;
-    const finalProductId = productId || idProduct;
-    const finalDescription = description || comment;
-
     title = title?.trim();
-    const cleanDescription = finalDescription?.trim();
+    description = description?.trim();
 
-    if (!finalCustomerId || !finalProductId || rating === undefined) {
+    if (!customer_id || !product_id || rating === undefined) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     const numRating = Number(rating);
+
     if (isNaN(numRating) || numRating < 1 || numRating > 5) {
-      return res.status(400).json({ message: "Rating must be a number between 1 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 1 and 5" });
     }
 
     const review = new productReviewModel({
-      customerId: finalCustomerId,
-      productId: finalProductId,
+      customer_id,
+      product_id,
       title,
       rating: numRating,
-      description: cleanDescription,
+      description,
       status,
+      reviewed_at,
     });
 
     await review.save();
+
     return res.status(201).json({ message: "Review saved" });
   } catch (error) {
     console.log("Error" + error);
@@ -75,13 +76,17 @@ productsReviewController.insertReviews = async (req, res) => {
   }
 };
 
-// Eliminar reviews
+// Eliminar review
 productsReviewController.deleteReviews = async (req, res) => {
   try {
-    const deletedReview = await productReviewModel.findByIdAndDelete(req.params.id);
+    const deletedReview = await productReviewModel.findByIdAndDelete(
+      req.params.id,
+    );
+
     if (!deletedReview) {
       return res.status(404).json({ message: "Review not found" });
     }
+
     return res.status(200).json({ message: "Review deleted" });
   } catch (error) {
     console.log("Error" + error);
@@ -89,53 +94,52 @@ productsReviewController.deleteReviews = async (req, res) => {
   }
 };
 
-// Actualizar reviews
+// Actualizar review
 productsReviewController.updateReviews = async (req, res) => {
   try {
     let {
-      customerId,
-      idEmployee,
-      productId,
-      idProduct,
+      customer_id,
+      product_id,
       title,
       rating,
       description,
-      comment,
       status,
+      reviewed_at,
     } = req.body;
 
-    const finalCustomerId = customerId || idEmployee;
-    const finalProductId = productId || idProduct;
-    const finalDescription = description || comment;
-
     title = title?.trim();
-    const cleanDescription = finalDescription?.trim();
+    description = description?.trim();
 
-    if (!finalCustomerId || !finalProductId || rating === undefined) {
+    if (!customer_id || !product_id || rating === undefined) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
     const numRating = Number(rating);
+
     if (isNaN(numRating) || numRating < 1 || numRating > 5) {
-      return res.status(400).json({ message: "Rating must be a number between 1 and 5" });
+      return res
+        .status(400)
+        .json({ message: "Rating must be a number between 1 and 5" });
     }
 
     const updatedReview = await productReviewModel.findByIdAndUpdate(
       req.params.id,
       {
-        customerId: finalCustomerId,
-        productId: finalProductId,
+        customer_id,
+        product_id,
         title,
         rating: numRating,
-        description: cleanDescription,
+        description,
         status,
+        reviewed_at,
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedReview) {
       return res.status(404).json({ message: "Review not found" });
     }
+
     return res.status(200).json({ message: "Review updated" });
   } catch (error) {
     console.log("Error" + error);
