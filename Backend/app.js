@@ -9,6 +9,7 @@ import logoutRoutes from "./src/routes/logout.js";
 import orderRoutes from "./src/routes/order.js";
 import productRoutes from "./src/routes/product.js";
 import productReview from "./src/routes/productReview.js";
+import cartRoutes from "./src/routes/cart.js";
 import registerEmployeeRoutes from "./src/routes/registerEmployees.js";
 import registerAdminRoutes from "./src/routes/registerAdmins.js";
 import registerCustomerRoutes from "./src/routes/registerCustomers.js";
@@ -44,9 +45,10 @@ app.use("/api/logout", logoutRoutes); //
 app.use("/api/orders", orderRoutes); //
 app.use("/api/products", productRoutes); //
 app.use("/api/productsReview", productReview); //
-app.use("/api/recoveryPasswordAdmin", recoveryPasswordAdminRoutes);
-app.use("/api/recoveryPasswordCustomer", recoveryPasswordCustomerRoutes);
-app.use("/api/recoveryPasswordEmployee", recoveryPasswordEmployeeRoutes);
+app.use("/api/shoppingCart", cartRoutes);
+app.use("/api/recoveryPasswordAdmin", recoveryPasswordAdminRoutes); //
+app.use("/api/recoveryPasswordCustomer", recoveryPasswordCustomerRoutes); //
+app.use("/api/recoveryPasswordEmployee", recoveryPasswordEmployeeRoutes); //
 app.use("/api/suppliers", suppliersRoutes); //
 app.use("/api/wompi", wompiRoutes);
 app.use("/api/registerEmployees", registerEmployeeRoutes); //
