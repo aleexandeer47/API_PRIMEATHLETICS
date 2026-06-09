@@ -1,4 +1,5 @@
 import productModel from "../models/product.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const productController = {};
 
@@ -8,7 +9,7 @@ productController.getProducts = async (req, res) => {
     const products = await productModel.find();
     return res.status(200).json(products);
   } catch (error) {
-    console.log("Error" + error);
+    console.log(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -16,138 +17,215 @@ productController.getProducts = async (req, res) => {
 // Insertar productos
 productController.insertProducts = async (req, res) => {
   try {
-    let {
+    const {
       name,
       brand,
       gender,
       category,
-      productType,
-      size,
+      product_type,
+      sport,
       description,
-      image,
       price,
       discount,
-      amount,
-      stock,
     } = req.body;
 
-    name = name?.trim();
-    brand = brand?.trim();
-    gender = gender?.trim();
-    category = category?.trim();
-    productType = productType?.trim();
-    size = size?.trim();
-    description = description?.trim();
-    image = image?.trim();
-    discount = discount?.trim();
-
-    const finalAmount = amount !== undefined ? amount : stock;
-
-    if (!name || price === undefined || finalAmount === undefined) {
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!name || !brand || !gender || !category || !product_type || !price) {
+      return res.status(400).json({
+        message: "Missing required fields",
+      });
     }
-    if (name.length < 3) {
-      return res.status(400).json({ message: "Name too short" });
+
+    let variants = [];
+
+    if (req.body.variants) {
+      variants = JSON.parse(req.body.variants);
+    }
+
+    if (req.files && req.files.length > 0) {
+      variants = variants.map((variant, index) => {
+        const file = req.files[index];
+
+        return {
+          ...variant,
+          images: file
+            ? [
+                {
+                  url: file.path,
+                  public_id: file.filename,
+                },
+              ]
+            : [],
+        };
+      });
     }
 
     const product = new productModel({
-      name,
-      brand,
-      gender,
-      category,
-      productType,
-      size,
-      description,
-      image,
-      price,
-      discount,
-      amount: finalAmount,
+      name: name.trim(),
+      brand: brand.trim(),
+      gender: gender.trim(),
+      category: category.trim(),
+      product_type: product_type.trim(),
+      sport: sport?.trim(),
+      description: description?.trim(),
+      price: Number(price),
+      discount: Number(discount) || 0,
+      variants,
     });
 
     await product.save();
-    return res.status(201).json({ message: "Product saved" });
+
+    return res.status(201).json({
+      message: "Product saved successfully",
+      product,
+    });
   } catch (error) {
-    console.log("Error" + error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("ERROR COMPLETO:");
+    console.error(error);
+
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
 // Eliminar productos
 productController.deleteProducts = async (req, res) => {
   try {
-    const deletedProduct = await productModel.findByIdAndDelete(req.params.id);
-    if (!deletedProduct) {
-      return res.status(404).json({ message: "Product not found" });
+    const productFound = await productModel.findById(req.params.id);
+
+    if (!productFound) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
     }
-    return res.status(200).json({ message: "Product deleted" });
+
+    for (const variant of productFound.variants) {
+      for (const image of variant.images) {
+        if (image.public_id) {
+          await cloudinary.uploader.destroy(image.public_id);
+        }
+      }
+    }
+
+    await productModel.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({
+      message: "Product deleted successfully",
+    });
   } catch (error) {
-    console.log("Error" + error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
 // Actualizar productos
 productController.updateProducts = async (req, res) => {
   try {
-    let {
+    const productFound = await productModel.findById(req.params.id);
+
+    if (!productFound) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    const {
       name,
       brand,
       gender,
       category,
-      productType,
-      size,
+      product_type,
+      sport,
       description,
-      image,
       price,
       discount,
-      amount,
-      stock,
+      variants,
     } = req.body;
-
-    name = name?.trim();
-    brand = brand?.trim();
-    gender = gender?.trim();
-    category = category?.trim();
-    productType = productType?.trim();
-    size = size?.trim();
-    description = description?.trim();
-    image = image?.trim();
-    discount = discount?.trim();
-
-    const finalAmount = amount !== undefined ? amount : stock;
-
-    if (!name || price === undefined || finalAmount === undefined) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-    if (name.length < 3) {
-      return res.status(400).json({ message: "Name too short" });
-    }
 
     const updatedProduct = await productModel.findByIdAndUpdate(
       req.params.id,
       {
-        name,
-        brand,
-        gender,
-        category,
-        productType,
-        size,
-        description,
-        image,
-        price,
-        discount,
-        amount: finalAmount,
+        name: name?.trim(),
+        brand: brand?.trim(),
+        gender: gender?.trim(),
+        category: category?.trim(),
+        product_type: product_type?.trim(),
+        sport: sport?.trim(),
+        description: description?.trim(),
+        price: Number(price),
+        discount: Number(discount) || 0,
+        variants: variants ? JSON.parse(variants) : productFound.variants,
       },
-      { new: true }
+      {
+        new: true,
+      },
     );
 
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    return res.status(200).json({ message: "Product updated" });
+    return res.status(200).json({
+      message: "Product updated successfully",
+      product: updatedProduct,
+    });
   } catch (error) {
-    console.log("Error" + error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+productController.updateVariantImage = async (req, res) => {
+  try {
+    const { id, color } = req.params;
+
+    const product = await productModel.findById(id);
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    const variant = product.variants.find(
+      (v) => v.color.toLowerCase() === color.toLowerCase(),
+    );
+
+    if (!variant) {
+      return res.status(404).json({
+        message: "Variant not found",
+      });
+    }
+
+    // Eliminar imágenes antiguas
+    for (const image of variant.images) {
+      if (image.public_id) {
+        await cloudinary.uploader.destroy(image.public_id);
+      }
+    }
+
+    // Guardar nueva imagen
+    variant.images = [
+      {
+        url: req.file.path,
+        public_id: req.file.filename,
+      },
+    ];
+
+    await product.save();
+
+    return res.status(200).json({
+      message: "Variant image updated successfully",
+      product,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
@@ -170,7 +248,9 @@ productController.getProductByName = async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) {
-      return res.status(400).json({ message: "Missing product name search term" });
+      return res
+        .status(400)
+        .json({ message: "Missing product name search term" });
     }
     const products = await productModel.find({
       name: { $regex: name.trim(), $options: "i" },
@@ -198,7 +278,9 @@ productController.getProductsByPriceRange = async (req, res) => {
   try {
     const { min, max } = req.body;
     if (min === undefined || max === undefined) {
-      return res.status(400).json({ message: "Missing min or max price range" });
+      return res
+        .status(400)
+        .json({ message: "Missing min or max price range" });
     }
     const products = await productModel.find({
       price: { $gte: Number(min), $lte: Number(max) },

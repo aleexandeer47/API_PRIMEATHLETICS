@@ -1,14 +1,16 @@
 import express from "express";
 import productController from "../controllers/productsController.js";
+import { uploadImageTo } from "../utils/cloudinaryConfig.js";
 
-//Router() nos ayudará a colocar los métodos
-//que tendrá el endpoint
 const router = express.Router();
 
+const uploadProducts = uploadImageTo("products");
+
+// CRUD de productos
 router
   .route("/")
   .get(productController.getProducts)
-  .post(productController.insertProducts);
+  .post(uploadProducts.array("images", 20), productController.insertProducts);
 
 router.route("/searchByName").post(productController.getProductByName);
 
@@ -23,5 +25,11 @@ router
   .get(productController.getProductById)
   .put(productController.updateProducts)
   .delete(productController.deleteProducts);
+
+router.put(
+  "/:id/variants/:color/image",
+  uploadProducts.single("image"),
+  productController.updateVariantImage,
+);
 
 export default router;
