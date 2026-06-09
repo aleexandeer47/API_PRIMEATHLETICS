@@ -37,6 +37,7 @@ const variantSchema = new Schema(
     color: {
       type: String,
       required: true,
+      trim: true,
     },
 
     images: {
@@ -65,31 +66,42 @@ const productSchema = new Schema(
     brand: {
       type: String,
       required: true,
-      trim: true,
+      lowercase: true,
+      enum: ["nike", "adidas", "puma"],
     },
 
     gender: {
       type: String,
-      enum: ["hombres", "mujeres", "ninos", "ninas", "unisex"],
       required: true,
+      enum: ["hombres", "mujeres", "ninos", "ninas", "unisex"],
     },
 
     category: {
       type: String,
       required: true,
-      trim: true,
+      enum: ["ropa", "zapatos"],
     },
 
     product_type: {
       type: String,
       required: true,
-      trim: true,
+      enum: ["camiseta", "pants", "short", "calcetas", "tenis", "sandalias"],
     },
 
     sport: {
       type: String,
       default: "training",
-      trim: true,
+      enum: [
+        "training",
+        "gym",
+        "running",
+        "basketball",
+        "football_turf",
+        "football_indoor",
+        "volleyball",
+        "crossfit",
+        "trail_running",
+      ],
     },
 
     description: {
@@ -111,9 +123,18 @@ const productSchema = new Schema(
       max: 100,
     },
 
+    featured: {
+      type: Boolean,
+      default: false,
+    },
+
+    active: {
+      type: Boolean,
+      default: true,
+    },
+
     variants: {
       type: [variantSchema],
-      required: true,
       default: [],
     },
   },

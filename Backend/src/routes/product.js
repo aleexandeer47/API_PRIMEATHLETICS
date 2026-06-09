@@ -20,6 +20,8 @@ router.route("/price-range").post(productController.getProductsByPriceRange);
 
 router.route("/count").get(productController.countProducts);
 
+router.get("/featured", productController.getFeaturedProducts);
+
 router
   .route("/:id")
   .get(productController.getProductById)

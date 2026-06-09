@@ -27,6 +27,8 @@ productController.insertProducts = async (req, res) => {
       description,
       price,
       discount,
+      featured,
+      active,
     } = req.body;
 
     if (!name || !brand || !gender || !category || !product_type || !price) {
@@ -69,6 +71,10 @@ productController.insertProducts = async (req, res) => {
       description: description?.trim(),
       price: Number(price),
       discount: Number(discount) || 0,
+
+      featured: featured === "true",
+      active: active !== "false",
+
       variants,
     });
 
@@ -142,6 +148,8 @@ productController.updateProducts = async (req, res) => {
       description,
       price,
       discount,
+      featured,
+      active,
       variants,
     } = req.body;
 
@@ -157,6 +165,12 @@ productController.updateProducts = async (req, res) => {
         description: description?.trim(),
         price: Number(price),
         discount: Number(discount) || 0,
+
+        featured:
+          featured !== undefined ? featured === "true" : productFound.featured,
+
+        active: active !== undefined ? active === "true" : productFound.active,
+
         variants: variants ? JSON.parse(variants) : productFound.variants,
       },
       {
@@ -300,6 +314,23 @@ productController.countProducts = async (req, res) => {
   } catch (error) {
     console.log("Error" + error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+productController.getFeaturedProducts = async (req, res) => {
+  try {
+    const products = await productModel.find({
+      featured: true,
+      active: true,
+    });
+
+    return res.status(200).json(products);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
