@@ -18,6 +18,7 @@ import recoveryPasswordCustomerRoutes from "./src/routes/recoveryPasswordCustome
 import recoveryPasswordEmployeeRoutes from "./src/routes/recoveryPasswordEmployee.js";
 import suppliersRoutes from "./src/routes/supplier.js";
 import wompiRoutes from "./src/routes/wompiToken.js";
+import newsRoutes from "./src/routes/news.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -54,5 +55,6 @@ app.use("/api/wompi", wompiRoutes);
 app.use("/api/registerEmployees", registerEmployeeRoutes); //
 app.use("/api/registerAdmin", registerAdminRoutes); //
 app.use("/api/registerCustomer", registerCustomerRoutes); //
+app.use("/api/news", newsRoutes); 
 
 export default app;

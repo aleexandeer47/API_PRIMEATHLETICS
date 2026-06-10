@@ -93,7 +93,7 @@ registerCustomerController.verifyCode = async (req, res) => {
       return res.status(400).json({ message: "Código inválido" });
     }
 
-    const customer = await customerModel.findOne({ email });
+    const customer = await customerModel.findOne({ email });    
     customer.isVerified = true;
     await customer.save();
 
