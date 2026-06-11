@@ -1,4 +1,5 @@
 import NewsModel from "../models/News.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const newsController = {};
 
@@ -111,21 +112,45 @@ newsController.getNewsById = async (req, res) => {
 
 newsController.updateNews = async (req, res) => {
   try {
-    const updatedNews = await NewsModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    if (!updatedNews) {
+    const newsId = req.params.id;
+    const newsFound = await NewsModel.findById(newsId);
+    if (!newsFound) {
       return res.status(404).json({
         success: false,
         message: "Novedad no encontrada",
       });
     }
+
+    const updateData = { ...req.body };
+
+    // Manejar carga de archivos desde Multer/Cloudinary
+    if (req.files) {
+      if (req.files.banner && req.files.banner[0]) {
+        // Eliminar banner antiguo
+        if (newsFound.public_idBanner) {
+          await cloudinary.uploader.destroy(newsFound.public_idBanner);
+        }
+        updateData.bannerImage = req.files.banner[0].path;
+        updateData.public_idBanner = req.files.banner[0].filename;
+      }
+      if (req.files.card && req.files.card[0]) {
+        // Eliminar card antigua
+        if (newsFound.public_idCard) {
+          await cloudinary.uploader.destroy(newsFound.public_idCard);
+        }
+        updateData.cardImage = req.files.card[0].path;
+        updateData.public_idCard = req.files.card[0].filename;
+      }
+    }
+
+    const updatedNews = await NewsModel.findByIdAndUpdate(
+      newsId,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     res.status(200).json({
       success: true,
@@ -146,14 +171,23 @@ newsController.updateNews = async (req, res) => {
 
 newsController.deleteNews = async (req, res) => {
   try {
-    const deletedNews = await NewsModel.findByIdAndDelete(req.params.id);
-
-    if (!deletedNews) {
+    const newsFound = await NewsModel.findById(req.params.id);
+    if (!newsFound) {
       return res.status(404).json({
         success: false,
         message: "Novedad no encontrada",
       });
     }
+
+    // Borrar imágenes de Cloudinary
+    if (newsFound.public_idBanner) {
+      await cloudinary.uploader.destroy(newsFound.public_idBanner);
+    }
+    if (newsFound.public_idCard) {
+      await cloudinary.uploader.destroy(newsFound.public_idCard);
+    }
+
+    await NewsModel.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,
