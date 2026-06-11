@@ -3,6 +3,25 @@ import { v2 as cloudinary } from "cloudinary";
 
 const offerController = {};
 
+const parseApplicableProducts = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+const parseActive = (value) => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return value !== "false";
+  return true;
+};
+
 offerController.getOffers = async (req, res) => {
   try {
     const offers = await offerModel.find().populate("applicable_products", "name");
@@ -29,10 +48,7 @@ offerController.insertOffer = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    let parsedProducts = [];
-    if (applicable_products) {
-      parsedProducts = JSON.parse(applicable_products);
-    }
+    const parsedProducts = parseApplicableProducts(applicable_products);
 
     let banner = undefined;
     if (req.file) {
@@ -48,7 +64,7 @@ offerController.insertOffer = async (req, res) => {
       discount_percentage: Number(discount_percentage),
       start_date: new Date(start_date),
       end_date: new Date(end_date),
-      active: active !== "false",
+      active: parseActive(active),
       applicable_products: parsedProducts,
       banner,
     });
@@ -107,13 +123,13 @@ offerController.updateOffer = async (req, res) => {
     const updatedOffer = await offerModel.findByIdAndUpdate(
       req.params.id,
       {
-        name: name?.trim(),
-        description: description?.trim(),
-        discount_percentage: discount_percentage ? Number(discount_percentage) : offerFound.discount_percentage,
+        name: name?.trim() ?? offerFound.name,
+        description: description?.trim() ?? offerFound.description,
+        discount_percentage: discount_percentage !== undefined ? Number(discount_percentage) : offerFound.discount_percentage,
         start_date: start_date ? new Date(start_date) : offerFound.start_date,
         end_date: end_date ? new Date(end_date) : offerFound.end_date,
-        active: active !== undefined ? active === "true" : offerFound.active,
-        applicable_products: applicable_products ? JSON.parse(applicable_products) : offerFound.applicable_products,
+        active: active !== undefined ? parseActive(active) : offerFound.active,
+        applicable_products: applicable_products !== undefined ? parseApplicableProducts(applicable_products) : offerFound.applicable_products,
       },
       { new: true }
     );
