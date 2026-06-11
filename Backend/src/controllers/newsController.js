@@ -1,11 +1,11 @@
 import NewsModel from "../models/News.js";
+import { v2 as cloudinary } from "cloudinary";
 
 const newsController = {};
 
 
 newsController.createNews = async (req, res) => {
   try {
-
     const {
       title,
       subtitle,
@@ -19,24 +19,33 @@ newsController.createNews = async (req, res) => {
       
     } = req.body;
 
+    let parsedRelatedProducts = [];
+    if (relatedProducts) {
+      try {
+        parsedRelatedProducts = typeof relatedProducts === "string"
+          ? JSON.parse(relatedProducts)
+          : relatedProducts;
+      } catch (e) {
+        parsedRelatedProducts = [];
+      }
+    }
+
     const news = new NewsModel({
       title,
       subtitle,
       description,
 
-      bannerImage: req.files.banner[0].path,
-      public_idBanner: req.files.banner[0].filename,
+      bannerImage: req.files?.banner?.[0]?.path || "",
+      public_idBanner: req.files?.banner?.[0]?.filename || "none",
 
-      cardImage: req.files.card[0].path,
-      public_idCard: req.files.card[0].filename,
+      cardImage: req.files?.card?.[0]?.path || "",
+      public_idCard: req.files?.card?.[0]?.filename || "none",
 
       category,
       releaseDate,
       isFeatured,
-      status,
       relatedProducts,
-      createdBy, 
-      
+      createdBy
     });
 
     await news.save();
@@ -46,17 +55,13 @@ newsController.createNews = async (req, res) => {
       message: "Novedad creada correctamente",
       data: news
     });
-
   } catch (error) {
-
     console.error(error);
-
     res.status(500).json({
       success: false,
       message: "Error al crear la novedad",
       error: error.message
     });
-
   }
 };
 
@@ -115,21 +120,62 @@ newsController.getNewsById = async (req, res) => {
 
 newsController.updateNews = async (req, res) => {
   try {
-    const updatedNews = await NewsModel.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    if (!updatedNews) {
+    const newsId = req.params.id;
+    const newsFound = await NewsModel.findById(newsId);
+    if (!newsFound) {
       return res.status(404).json({
         success: false,
         message: "Novedad no encontrada",
       });
     }
+
+    const updateData = { ...req.body };
+
+    // Parsear booleanos y arrays del FormData
+    if (updateData.isFeatured !== undefined) {
+      updateData.isFeatured = updateData.isFeatured === "true" || updateData.isFeatured === true;
+    }
+    if (updateData.relatedProducts !== undefined) {
+      try {
+        updateData.relatedProducts = typeof updateData.relatedProducts === "string"
+          ? JSON.parse(updateData.relatedProducts)
+          : updateData.relatedProducts;
+      } catch (e) {
+        updateData.relatedProducts = [];
+      }
+    }
+    if (updateData.releaseDate === "") {
+      updateData.releaseDate = null;
+    }
+
+    // Manejar carga de archivos desde Multer/Cloudinary
+    if (req.files) {
+      if (req.files.banner && req.files.banner[0]) {
+        // Eliminar banner antiguo
+        if (newsFound.public_idBanner && newsFound.public_idBanner !== "none") {
+          await cloudinary.uploader.destroy(newsFound.public_idBanner);
+        }
+        updateData.bannerImage = req.files.banner[0].path;
+        updateData.public_idBanner = req.files.banner[0].filename;
+      }
+      if (req.files.card && req.files.card[0]) {
+        // Eliminar card antigua
+        if (newsFound.public_idCard && newsFound.public_idCard !== "none") {
+          await cloudinary.uploader.destroy(newsFound.public_idCard);
+        }
+        updateData.cardImage = req.files.card[0].path;
+        updateData.public_idCard = req.files.card[0].filename;
+      }
+    }
+
+    const updatedNews = await NewsModel.findByIdAndUpdate(
+      newsId,
+      updateData,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     res.status(200).json({
       success: true,
@@ -150,14 +196,23 @@ newsController.updateNews = async (req, res) => {
 
 newsController.deleteNews = async (req, res) => {
   try {
-    const deletedNews = await NewsModel.findByIdAndDelete(req.params.id);
-
-    if (!deletedNews) {
+    const newsFound = await NewsModel.findById(req.params.id);
+    if (!newsFound) {
       return res.status(404).json({
         success: false,
         message: "Novedad no encontrada",
       });
     }
+
+    // Borrar imágenes de Cloudinary
+    if (newsFound.public_idBanner) {
+      await cloudinary.uploader.destroy(newsFound.public_idBanner);
+    }
+    if (newsFound.public_idCard) {
+      await cloudinary.uploader.destroy(newsFound.public_idCard);
+    }
+
+    await NewsModel.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,
