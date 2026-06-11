@@ -12,9 +12,11 @@ newsController.createNews = async (req, res) => {
       description,
       category,
       releaseDate,
+      status,
       isFeatured,
       relatedProducts,
-      createdBy
+      createdBy,
+      
     } = req.body;
 
     const news = new NewsModel({
@@ -31,8 +33,10 @@ newsController.createNews = async (req, res) => {
       category,
       releaseDate,
       isFeatured,
+      status,
       relatedProducts,
-      createdBy
+      createdBy, 
+      
     });
 
     await news.save();
