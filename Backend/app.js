@@ -23,6 +23,7 @@ import authRoutes from "./src/routes/auth.js";
 import dashboardRoutes from "./src/routes/dashboard.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import offersRoutes from "./src/routes/offers.js";
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use("/api/registerAdmin", registerAdminRoutes); //
 app.use("/api/registerCustomer", registerCustomerRoutes); //
 app.use("/api/news", newsRoutes); 
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/offers", offersRoutes);
 
 export default app;
 
