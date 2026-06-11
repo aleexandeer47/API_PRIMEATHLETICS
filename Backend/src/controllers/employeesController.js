@@ -1,4 +1,5 @@
 import employeeModel from "../models/employee.js";
+import bcryptjs from "bcryptjs";
 
 const employeesController = {};
 
@@ -62,7 +63,7 @@ employeesController.updateEmployee = async (req, res) => {
     address = address?.trim();
     position = position?.trim();
 
-    if (!name || !email || !password || !position) {
+    if (!name || !email || !position) {
       return res.status(400).json({ message: "Missing required fields" });
     }
     if (name.length < 3) {
@@ -71,13 +72,28 @@ employeesController.updateEmployee = async (req, res) => {
     if (email.length > 100) {
       return res.status(400).json({ message: "Email too long" });
     }
-    if (password.length < 8) {
-      return res.status(400).json({ message: "Password too short" });
+
+    const updateData = {
+      name,
+      email,
+      phoneNumber,
+      address,
+      position,
+      hireDate,
+      status,
+      isVerified,
+    };
+
+    if (password && password.length > 0) {
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password too short" });
+      }
+      updateData.password = await bcryptjs.hash(password, 10);
     }
 
     const updatedEmployee = await employeeModel.findByIdAndUpdate(
       req.params.id,
-      { name, email, password, phoneNumber, address, position, hireDate, status, isVerified },
+      updateData,
       { new: true }
     );
     if (!updatedEmployee) {

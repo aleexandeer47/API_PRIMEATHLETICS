@@ -25,7 +25,19 @@ loginEmployeeController.login = async (req, res) => {
       return res.status(403).json({ message: "Cuenta bloqueada" });
     }
 
-    const isMatch = await bcrypt.compare(password, employeeFound.password);
+    let isMatch = false;
+    const isBcryptHash = employeeFound.password && employeeFound.password.startsWith('$') && employeeFound.password.length === 60;
+
+    if (isBcryptHash) {
+      isMatch = await bcrypt.compare(password, employeeFound.password);
+    } else {
+      isMatch = (password === employeeFound.password);
+      if (isMatch) {
+        // Migrar contraseña de texto plano a bcrypt hash
+        const passwordHash = await bcrypt.hash(password, 10);
+        employeeFound.password = passwordHash;
+      }
+    }
 
     if (!isMatch) {
       employeeFound.loginAttempts = (employeeFound.loginAttempts || 0) + 1;
@@ -52,9 +64,22 @@ loginEmployeeController.login = async (req, res) => {
       { expiresIn: "30d" }
     );
 
-    res.cookie("authCookie", token);
+    res.cookie("authCookie", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 días
+    });
 
-    return res.status(200).json({ message: "Login exitoso" });
+    return res.status(200).json({
+      message: "Login exitoso",
+      user: {
+        id: employeeFound._id,
+        name: employeeFound.name,
+        email: employeeFound.email,
+        role: "employee"
+      }
+    });
   } catch (error) {
     console.log("error" + error);
     return res.status(500).json({ message: "Internal server error" });

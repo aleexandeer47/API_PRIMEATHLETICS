@@ -4,7 +4,7 @@ const orderSchema = new Schema(
   {
     shopping_cart_id: {
       type: Schema.Types.ObjectId,
-      ref: "ShoppingCart",
+      ref: "shoppingCart",
     },
     payment_method: {
       type: String,

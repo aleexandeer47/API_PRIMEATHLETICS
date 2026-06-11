@@ -1,15 +1,18 @@
 import express from "express";
-import suppliers from "../controllers/supliersController.js";
+import suppliersController from "../controllers/supliersController.js";
+import { protect, restrictTo } from "../../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
+router.use(protect, restrictTo("admin", "employee"));
+
 router.route("/")
-    .get(suppliers.getSuppliers)
-    .post(suppliers.insertSupplier);
+    .get(suppliersController.getSuppliers)
+    .post(suppliersController.insertSupplier);
 
 router.route("/:id")
-    .put(suppliers.updateSupplier)
-    .delete(suppliers.deleteSupplier)
-    .get(suppliers.getSupplierById);
+    .put(suppliersController.updateSupplier)
+    .delete(suppliersController.deleteSupplier)
+    .get(suppliersController.getSupplierById);
 
 export default router;

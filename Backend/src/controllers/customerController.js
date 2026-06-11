@@ -1,11 +1,12 @@
 import customerModel from "../models/customer.js";
+import bcryptjs from "bcryptjs";
 
 const customersController = {};
 
 // Obtener customers
 customersController.getCustomers = async (req, res) => {
   try {
-    const customers = await customerModel.find();
+    const customers = await customerModel.find().select("-password");
     return res.status(200).json(customers);
   } catch (error) {
     console.log("Error" + error);
@@ -16,7 +17,7 @@ customersController.getCustomers = async (req, res) => {
 // Obtener customer por ID
 customersController.getCustomerById = async (req, res) => {
   try {
-    const customer = await customerModel.findById(req.params.id);
+    const customer = await customerModel.findById(req.params.id).select("-password");
     if (!customer) {
       return res.status(404).json({ message: "Customer not found" });
     }
@@ -52,7 +53,7 @@ customersController.updateCustomer = async (req, res) => {
     phoneNumber = phoneNumber?.trim();
     address = address?.trim();
 
-    if (!name || !email || !password) {
+    if (!name || !email) {
       return res.status(400).json({ message: "Missing required fields" });
     }
     if (name.length < 3) {
@@ -61,13 +62,26 @@ customersController.updateCustomer = async (req, res) => {
     if (email.length > 100) {
       return res.status(400).json({ message: "Email too long" });
     }
-    if (password.length < 8) {
-      return res.status(400).json({ message: "Password too short" });
+
+    const updateData = {
+      name,
+      email,
+      phoneNumber,
+      address,
+      status,
+      isVerified,
+    };
+
+    if (password && password.length > 0) {
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password too short" });
+      }
+      updateData.password = await bcryptjs.hash(password, 10);
     }
 
     const updatedCustomer = await customerModel.findByIdAndUpdate(
       req.params.id,
-      { name, email, password, phoneNumber, address, status, isVerified },
+      updateData,
       { new: true }
     );
     if (!updatedCustomer) {

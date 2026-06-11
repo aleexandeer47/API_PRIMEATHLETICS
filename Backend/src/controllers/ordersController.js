@@ -1,10 +1,27 @@
 import orderModel from "../models/order.js";
+import "../models/cart.js";
+import "../models/customer.js";
+import "../models/product.js";
 
+// nodemon trigger 2
 const ordersController = {};
 
 ordersController.getOrders = async (req, res) => {
   try {
-    const orders = await orderModel.find();
+    const orders = await orderModel.find()
+      .populate({
+        path: "shopping_cart_id",
+        populate: [
+          {
+            path: "customer_id",
+            select: "name email"
+          },
+          {
+            path: "items.product_id",
+            select: "name price variants"
+          }
+        ]
+      });
     return res.status(200).json(orders);
   } catch (error) {
     console.log("Error" + error);
@@ -14,7 +31,20 @@ ordersController.getOrders = async (req, res) => {
 
 ordersController.getOrderById = async (req, res) => {
   try {
-    const order = await orderModel.findById(req.params.id);
+    const order = await orderModel.findById(req.params.id)
+      .populate({
+        path: "shopping_cart_id",
+        populate: [
+          {
+            path: "customer_id",
+            select: "name email"
+          },
+          {
+            path: "items.product_id",
+            select: "name price variants"
+          }
+        ]
+      });
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }

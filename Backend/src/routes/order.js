@@ -1,15 +1,16 @@
 import express from "express"
 import ordersController from "../controllers/ordersController.js"
+import { protect, restrictTo } from "../../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 router.route("/")
-.get(ordersController.getOrders)
-.post(ordersController.insertOrder)
+.get(protect, ordersController.getOrders)
+.post(protect, ordersController.insertOrder)
 
 router.route("/:id")
-.put(ordersController.updateOrder)
-.delete(ordersController.deleteOrder)
-.get(ordersController.getOrderById)
+.put(protect, restrictTo("admin", "employee"), ordersController.updateOrder)
+.delete(protect, restrictTo("admin"), ordersController.deleteOrder)
+.get(protect, ordersController.getOrderById)
 
 export default router
