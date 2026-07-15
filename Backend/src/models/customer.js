@@ -5,6 +5,9 @@ const customerSchema = new Schema(
     name: {
       type: String,
     },
+    lastName:{
+      type: String,
+    },
     email: {
       type: String,
     },

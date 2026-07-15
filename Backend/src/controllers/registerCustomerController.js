@@ -11,7 +11,7 @@ const registerCustomerController = {};
 
 registerCustomerController.register = async (req, res) => {
   try {
-    const { name, email, password, phoneNumber, address } = req.body;
+    const { name, lastName, email, password, phoneNumber, address } = req.body;
 
     const existCustomer = await customerModel.findOne({ email });
     if (existCustomer) {
@@ -22,12 +22,13 @@ registerCustomerController.register = async (req, res) => {
 
     const newCustomer = new customerModel({
       name,
+      lastName,
       email,
       password: passwordHash,
       phoneNumber,
       address,
       status: true,
-      isVerified: false,
+      isVerified:false,
       loginAttempts: 0,
       timeOut: null,
       registeredAt: new Date(),
@@ -35,10 +36,10 @@ registerCustomerController.register = async (req, res) => {
 
     await newCustomer.save();
 
-    const verificationCode = crypto.randomBytes(3).toString("hex");
+    const code = crypto.randomBytes(3).toString("hex");
 
     const tokenCode = JsonWebToken.sign(
-      { email, verificationCode },
+      { email, code },
       config.JWT.secret,
       { expiresIn: "15m" }
     );
@@ -61,7 +62,7 @@ registerCustomerController.register = async (req, res) => {
       subject: "Verificación de cuenta - PrimeAthletics",
       text:
         "Para verificar tu cuenta, utiliza este código: " +
-        verificationCode +
+        code +
         " — expira en 15 minutos.",
     };
 
@@ -83,13 +84,13 @@ registerCustomerController.register = async (req, res) => {
 
 registerCustomerController.verifyCode = async (req, res) => {
   try {
-    const { verificationCode } = req.body;
+    const { code } = req.body;
     const token = req.cookies.verificationTokenCookie;
 
     const decoded = JsonWebToken.verify(token, config.JWT.secret);
-    const { email, verificationCode: storedCode } = decoded;
+    const { email, code: storedCode } = decoded;
 
-    if (verificationCode !== storedCode) {
+    if (code !== storedCode) {
       return res.status(400).json({ message: "Código inválido" });
     }
 
