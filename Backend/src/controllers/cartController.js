@@ -40,9 +40,10 @@ cartController.getCartById = async (req, res) => {
 // INSERT
 cartController.insertCart = async (req, res) => {
   try {
-    const { customer_id, items, status } = req.body;
+    const customer_id = req.user._id;
+    const { items, status } = req.body;
 
-    if (!customer_id || !items?.length) {
+    if (!items?.length) {
       return res.status(400).json({
         message: "Missing required fields",
       });
@@ -107,9 +108,23 @@ cartController.insertCart = async (req, res) => {
 // UPDATE
 cartController.updateCart = async (req, res) => {
   try {
-    const { customer_id, items, status } = req.body;
+    const existingCart = await cartModel.findById(req.params.id);
 
-    if (!customer_id || !items?.length) {
+    if (!existingCart) {
+      return res.status(404).json({
+        message: "Cart not found",
+      });
+    }
+
+    if (existingCart.customer_id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "No puedes modificar este carrito",
+      });
+    }
+
+    const { items, status } = req.body;
+
+    if (!items?.length) {
       return res.status(400).json({
         message: "Missing required fields",
       });
@@ -154,7 +169,6 @@ cartController.updateCart = async (req, res) => {
     const updatedCart = await cartModel.findByIdAndUpdate(
       req.params.id,
       {
-        customer_id,
         items: newItems,
         total_before_discount,
         total_savings,
@@ -163,12 +177,6 @@ cartController.updateCart = async (req, res) => {
       },
       { new: true },
     );
-
-    if (!updatedCart) {
-      return res.status(404).json({
-        message: "Cart not found",
-      });
-    }
 
     return res.status(200).json({
       message: "Cart updated",

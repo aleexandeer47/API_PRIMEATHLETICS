@@ -14,10 +14,21 @@ customersController.getCustomers = async (req, res) => {
   }
 };
 
+customersController.getMe = async (req, res) => {
+  try {
+    return res.status(200).json({ user: req.user });
+  } catch (error) {
+    console.log("error " + error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Obtener customer por ID
 customersController.getCustomerById = async (req, res) => {
   try {
-    const customer = await customerModel.findById(req.params.id).select("-password");
+    const customer = await customerModel
+      .findById(req.params.id)
+      .select("-password");
     if (!customer) {
       return res.status(404).json({ message: "Customer not found" });
     }
@@ -31,7 +42,9 @@ customersController.getCustomerById = async (req, res) => {
 // Eliminar customer
 customersController.deleteCustomer = async (req, res) => {
   try {
-    const deletedCustomer = await customerModel.findByIdAndDelete(req.params.id);
+    const deletedCustomer = await customerModel.findByIdAndDelete(
+      req.params.id,
+    );
     if (!deletedCustomer) {
       return res.status(404).json({ message: "Customer not found" });
     }
@@ -82,7 +95,7 @@ customersController.updateCustomer = async (req, res) => {
     const updatedCustomer = await customerModel.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      { new: true },
     );
     if (!updatedCustomer) {
       return res.status(404).json({ message: "Customer not found" });
