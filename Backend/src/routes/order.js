@@ -1,16 +1,22 @@
-import express from "express"
-import ordersController from "../controllers/ordersController.js"
+import express from "express";
+import ordersController from "../controllers/ordersController.js";
 import { protect, restrictTo } from "../../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/")
-.get(protect, ordersController.getOrders)
-.post(protect, ordersController.insertOrder)
+router
+  .route("/me")
+  .get(protect, restrictTo("customer"), ordersController.getMyOrders);
 
-router.route("/:id")
-.put(protect, restrictTo("admin", "employee"), ordersController.updateOrder)
-.delete(protect, restrictTo("admin"), ordersController.deleteOrder)
-.get(protect, ordersController.getOrderById)
+router
+  .route("/")
+  .get(protect, ordersController.getOrders)
+  .post(protect, ordersController.insertOrder);
 
-export default router
+router
+  .route("/:id")
+  .put(protect, restrictTo("admin", "employee"), ordersController.updateOrder)
+  .delete(protect, restrictTo("admin"), ordersController.deleteOrder)
+  .get(protect, ordersController.getOrderById);
+
+export default router;
