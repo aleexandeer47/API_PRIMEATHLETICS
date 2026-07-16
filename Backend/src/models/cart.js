@@ -16,6 +16,12 @@ const shoppingCartSchema = new Schema(
           type: Number,
           default: 1,
         },
+        color: {
+          type: String,
+        },
+        size: {
+          type: String,
+        },
         subtotal: {
           type: Number,
         },

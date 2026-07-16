@@ -18,6 +18,21 @@ cartController.getAllCarts = async (req, res) => {
   }
 };
 
+// GET MY ACTIVE CART
+cartController.getMyCart = async (req, res) => {
+  try {
+    const cart = await cartModel
+      .findOne({ customer_id: req.user._id, status: true })
+      .sort({ created_at: -1 })
+      .populate("items.product_id");
+
+    return res.status(200).json({ cart: cart || null });
+  } catch (error) {
+    console.log("error " + error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // GET BY ID
 cartController.getCartById = async (req, res) => {
   try {
@@ -66,7 +81,10 @@ cartController.insertCart = async (req, res) => {
 
       const price = Number(productFound.price);
 
-      const discount = parseFloat(productFound.discount?.replace("%", "")) || 0;
+      const discount =
+        typeof productFound.discount === "string"
+          ? parseFloat(productFound.discount.replace("%", "")) || 0
+          : Number(productFound.discount) || 0;
 
       const subtotal = price * items[i].quantity;
 
@@ -81,6 +99,8 @@ cartController.insertCart = async (req, res) => {
       newItems.push({
         product_id: items[i].product_id,
         quantity: items[i].quantity,
+        color: items[i].color,
+        size: items[i].size,
         subtotal: finalSubtotal,
       });
     }
@@ -98,6 +118,7 @@ cartController.insertCart = async (req, res) => {
 
     return res.status(201).json({
       message: "Cart saved",
+      cart: newCart,
     });
   } catch (error) {
     console.log("error " + error);
@@ -147,7 +168,10 @@ cartController.updateCart = async (req, res) => {
 
       const price = Number(productFound.price);
 
-      const discount = parseFloat(productFound.discount?.replace("%", "")) || 0;
+      const discount =
+        typeof productFound.discount === "string"
+          ? parseFloat(productFound.discount.replace("%", "")) || 0
+          : Number(productFound.discount) || 0;
 
       const subtotal = price * items[i].quantity;
 
@@ -162,6 +186,8 @@ cartController.updateCart = async (req, res) => {
       newItems.push({
         product_id: items[i].product_id,
         quantity: items[i].quantity,
+        color: items[i].color,
+        size: items[i].size,
         subtotal: finalSubtotal,
       });
     }
@@ -180,6 +206,7 @@ cartController.updateCart = async (req, res) => {
 
     return res.status(200).json({
       message: "Cart updated",
+      cart: updatedCart,
     });
   } catch (error) {
     console.log("error " + error);

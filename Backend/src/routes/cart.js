@@ -10,6 +10,10 @@ router
   .post(protect, restrictTo("customer"), cartController.insertCart);
 
 router
+  .route("/me")
+  .get(protect, restrictTo("customer"), cartController.getMyCart);
+
+router
   .route("/:id")
   .put(protect, restrictTo("customer"), cartController.updateCart)
   .delete(protect, cartController.deleteCart)
