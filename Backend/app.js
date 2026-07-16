@@ -24,6 +24,7 @@ import dashboardRoutes from "./src/routes/dashboard.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import offersRoutes from "./src/routes/offers.js";
+import categoriesRoutes from "./src/routes/categories.js";
 
 const app = express();
 
@@ -59,9 +60,9 @@ app.use("/api/wompi", wompiRoutes);
 app.use("/api/registerEmployees", registerEmployeeRoutes); //
 app.use("/api/registerAdmin", registerAdminRoutes); //
 app.use("/api/registerCustomer", registerCustomerRoutes); //
-app.use("/api/news", newsRoutes); 
+app.use("/api/news", newsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/offers", offersRoutes);
+app.use("/api/categories", categoriesRoutes);
 
 export default app;
-
