@@ -1,4 +1,4 @@
-import NewsModel from "../models/News.js";
+import NewsModel from "../models/news.js";
 import { v2 as cloudinary } from "cloudinary";
 
 const newsController = {};
